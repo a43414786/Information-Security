@@ -1,24 +1,43 @@
+from hashlib import new
 from Crypto.Cipher import DES
+import binascii
 
-key = b'abcdefgh'  # 密钥 8位或16位,必须为bytes
+class Des():
+    def __init__(self,plainText:str,key:str):
+        self.plainText = self.zeropadding(plainText,8)
+        self.plainText = self.plainText.encode('utf-8')
+        self.cipherText = ""
+        # print(self.plainText)
+        self.key = self.zeropadding(key,8,True)
+        self.key = self.key.encode('utf-8')
+        # print(self.key)
+        
+    def zeropadding(self,text:str,size:int,isKey = False):
+        while len(text) % size != 0:
+            text += '\0'
+        if(isKey):
+            return text[0:8]
+        else:
+            return text
+        # text = text[0:8]
+        
+    def encode(self):
+        des = DES.new(self.key, DES.MODE_ECB)
+        self.cipherText = des.encrypt(self.plainText)
+        print(self.cipherText.hex())
 
+        return
+    
+des = Des('Hello','abcdefgh')
+des.encode()
+print(binascii.unhexlify(des.cipherText.hex()))
+des = Des('Hello','ibcdefgh')
+des.encode()
+print(binascii.unhexlify(des.cipherText.hex()))
+des = Des('Hello','abcdefgh')
+des.encode()
+print(binascii.unhexlify(des.cipherText.hex()))
+des = Des('Helln','abcdefgh')
+des.encode()
+print(binascii.unhexlify(des.cipherText.hex()))
 
-def pad(text):
-    # 如果text不是8的倍数【加密文本text必须为8的倍数！】，补足为8的倍数
-    while len(text) % 8 != 0:
-        text += ' '
-    return text
-
-
-des = DES.new(key, DES.MODE_ECB)  # 创建DES实例
-text = 'Python rocks!'
-padded_text = pad(text)
-
-encrypted_text = des.encrypt(padded_text.encode('utf-8'))  # 加密
-print(encrypted_text)
-# b'>\xfc\x1f\x16x\x87\xb2\x93\x0e\xfcH\x02\xd59VQ'
-
-plain_text = des.decrypt(encrypted_text).decode().rstrip(' ')  # 解密
-print(plain_text)
-# Python rocks!
-# YYYYiJceGQ3Q1JceGI0XHgxMFx4MWJceGU1XHhiMlZceDE1XHgxZEZJXHhkMFx4OTg8XHhlNlx4ZDd4OVx4ZTdceGY2R1x4MTJceGZiXHg4OVx4ZTFceGNiXHg5OC5ceGRjdFx4MDZceGVkdU96XHhkNFx4OTBceDExXHhkMDQnXHhhNFx0TnEkXHhmZXtceDlhXHhjOVx4YjJceDA4XHhjNDYiYYY
